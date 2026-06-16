@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>ANOR Control Center</title>
+
+<style>
+
+:root{
+    --bg:#0f1113;
+    --card:#1a1d21;
+    --green:#008450;
+    --gold:#f6c445;
+    --blue:#2563eb;
+    --red:#ce1126;
+    --text:#ffffff;
+    --gray:#94a3b8;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:var(--bg);
+    color:white;
+    font-family:Segoe UI,sans-serif;
+    min-height:100vh;
+}
+
+.header{
+    text-align:center;
+    padding:40px 20px 25px 20px;
+    background:linear-gradient(
+        135deg,
+        #1a1d21,
+        #111827
+    );
+    border-bottom:3px solid var(--gold);
+}
+
+.logo{
+    width:90px;
+    margin-bottom:15px;
+}
+
+.header h1{
+    color:white;
+    font-size:2rem;
+}
+
+.header p{
+    color:var(--gray);
+    margin-top:8px;
+}
+
+.live{
+    display:inline-flex;
+    align-items:center;
+    margin-top:15px;
+    background:#122b1c;
+    padding:8px 15px;
+    border-radius:30px;
+    color:#4ade80;
+    font-weight:bold;
+}
+
+.live::before{
+    content:'';
+    width:10px;
+    height:10px;
+    background:#4ade80;
+    border-radius:50%;
+    margin-right:10px;
+    animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse{
+    0%{opacity:1}
+    50%{opacity:.3}
+    100%{opacity:1}
+}
+
+.nav-bar {
+    display:flex;
+    justify-content:center;
+    gap:15px;
+    margin-top:20px;
+    flex-wrap:wrap;
+    padding:0 20px;
+}
+
+.stats{
+    max-width:1400px;
+    margin:30px auto;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+    padding:0 20px;
+}
+
+.stat{
+    background:var(--card);
+    border-radius:15px;
+    padding:25px;
+    text-align:center;
+    border:1px solid #293241;
+    transition:.3s;
+}
+
+.stat:hover{
+    transform:translateY(-6px);
+}
+
+.stat h2{
+    font-size:2.4rem;
+    color:var(--gold);
+}
+
+.stat span{
+    color:var(--gray);
+}
+
+.modules{
+    max-width:1400px;
+    margin:20px auto 50px;
+    padding:0 20px;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+    gap:25px;
+}
+
+.card{
+    background:var(--card);
+    border-radius:18px;
+    padding:30px;
+    text-align:center;
+    border:1px solid #293241;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    align-items:center;
+    transition:.35s;
+}
+
+.card:hover{
+    transform:translateY(-8px);
+    border-color:var(--gold);
+}
+
+.icon{
+    font-size:3rem;
+    margin-bottom:15px;
+}
+
+.card h3{
+    margin-bottom:10px;
+}
+
+.card p{
+    color:var(--gray);
+    line-height:1.6;
+    min-height:70px;
+    margin-bottom:15px;
+}
+
+.btn{
+    display:inline-block;
+    padding:14px 25px;
+    border-radius:10px;
+    text-decoration:none;
+    color:white;
+    font-weight:bold;
+    transition:.3s;
+    text-align:center;
+    width:100%;
+    max-width:220px;
+}
+
+.btn:hover{
+    transform:scale(1.05);
+}
+
+.forge{ background:var(--green); }
+.registry{ background:var(--blue); }
+.map{ background:var(--red); }
+.ai{ background:#6d28d9; }
+.login { background:#374151; }
+
+.footer{
+    text-align:center;
+    padding:20px;
+    color:var(--gray);
+    font-size:0.9rem;
+    border-top:1px solid #293241;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <img src="./assets/logo_anor.png" class="logo" alt="ANOR Logo">
+    <h1>ANOR CONTROL CENTER</h1>
+    <p>Centre National de Certification, Traçabilité et Surveillance Anti-Contrefaçon</p>
+    <div class="live">SURVEILLANCE ACTIVE</div>
+</div>
+
+<div class="nav-bar">
+    <a href="#" class="btn forge" style="padding:10px 15px; font-size:0.9rem; width:auto; pointer-events:none; opacity:0.6;">🏠 Dashboard</a>
+    <a href="./forge.html" class="btn forge" style="padding:10px 15px; font-size:0.9rem; width:auto;">🏭 Forge</a>
+    <a href="./registry.html" class="btn registry" style="padding:10px 15px; font-size:0.9rem; width:auto;">📋 Registry</a>
+    <a href="./map_surveillance.html" class="btn map" style="padding:10px 15px; font-size:0.9rem; width:auto;">🗺️ Carte</a>
+    <a href="./alerts_center.html" class="btn map" style="padding:10px 15px; font-size:0.9rem; width:auto;">🚨 Alertes</a>
+    <a href="./intelligence_center.html" class="btn ai" style="padding:10px 15px; font-size:0.9rem; width:auto;">🧠 Intelligence</a>
+</div>
+
+<div class="stats">
+    <div class="stat">
+        <h2 id="products" style="color:#4ade80;">0</h2>
+        <span>Produits Certifiés</span>
+    </div>
+    <div class="stat">
+        <h2 id="seals">0</h2>
+        <span>Sceaux Actifs</span>
+    </div>
+    <div class="stat">
+        <h2 id="scans" style="color:#60a5fa;">0</h2>
+        <span>Scans Réalisés</span>
+    </div>
+    <div class="stat">
+        <h2 id="alerts" style="color:#f87171;">0</h2>
+        <span>Alertes Détectées</span>
+    </div>
+</div>
+
+<div class="modules">
+
+    <div class="card">
+        <div>
+            <div class="icon">🏭</div>
+            <h3>Forge de Certification</h3>
+            <p>Création des sceaux ANOR, génération des kits ZIP, intégration packaging, certificats et QR sécurisés.</p>
+        </div>
+        <a href="./forge.html" class="btn forge">Accéder à la Forge</a>
+    </div>
+
+    <div class="card">
+        <div>
+            <div class="icon">📋</div>
+            <h3>Registre National</h3>
+            <p>Catalogue complet des certifications, audits, renouvellements, révocations et suspensions.</p>
+        </div>
+        <a href="./registry.html" class="btn registry">Ouvrir le Registre</a>
+    </div>
+
+    <div class="card">
+        <div>
+            <div class="icon">🗺️</div>
+            <h3>Cartographie Nationale</h3>
+            <p>Visualisation temps réel des scans, foyers suspects, alertes IA et surveillance terrain.</p>
+        </div>
+        <a href="./map_surveillance.html" class="btn map">Ouvrir la Cartographie</a>
+    </div>
+
+    <div class="card">
+        <div>
+            <div class="icon">🧠</div>
+            <h3>Intelligence ANOR</h3>
+            <p>Analyse prédictive des comportements suspects et détection avancée de contrefaçon.</p>
+        </div>
+        <a href="./intelligence_center.html" class="btn ai">Module IA</a>
+    </div>
+
+    <div class="card">
+        <div>
+            <div class="icon">🚨</div>
+            <h3>Centre d'Alertes</h3>
+            <p>Gestion des signalements, sceaux suspects, fraudes détectées et incidents terrain.</p>
+        </div>
+        <a href="./alerts_center.html" class="btn map">Ouvrir les Alertes</a>
+    </div>
+
+    <div class="card">
+        <div>
+            <div class="icon">📄</div>
+            <h3>Dossiers d'Audit</h3>
+            <p>Consultation complète des dossiers produits, historique des scans et traçabilité.</p>
+        </div>
+        <a href="./registry.html" class="btn registry">Consulter les dossiers produits</a>
+    </div>
+
+</div>
+
+<div class="footer">
+    ANOR © 2026<br>Plateforme Nationale de Certification Numérique
+</div>
+
+<script>
+// Routage adaptatif intelligent de l'API (Localhost vs Render)
+const API = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:3000/api/admin"
+    : "https://anor-back.onrender.com/api/admin";
+
+// Fonction utilitaire pour injecter le token d'authentification
+function getAuthHeaders(headers = {}) {
+    const token = localStorage.getItem("anor_token");
+    if (!token) {
+        console.warn("Requête de tableau de bord émise sans session valide.");
+        return headers;
+    }
+    return {
+        ...headers,
+        "Authorization": `Bearer ${token}`
+    };
+}
+
+async function loadStats(){
+    try{
+        const res = await fetch(`${API}/stats`, {
+            headers: getAuthHeaders()
+        });
+        const data = await res.json();
+
+        document.getElementById('products').innerText = data.totalProducts || 0;
+        document.getElementById('seals').innerText = data.totalSeals || 0;
+        document.getElementById('scans').innerText = data.totalScans || 0;
+        
+        // Double sécurité sur la clé pour éviter tout crash
+        document.getElementById('alerts').innerText = data.suspiciousSeals || data.totalSuspicious || 0;
+
+    }catch(e){
+        console.error("Erreur de chargement des statistiques du Dashboard:", e);
+    }
+}
+
+// Chargement direct au démarrage
+loadStats();
+</script>
+
+</body>
+</html>

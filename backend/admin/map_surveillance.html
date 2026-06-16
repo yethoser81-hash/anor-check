@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ANOR - Centre National de Surveillance v1.1</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+<style>
+:root {
+    --green: #008450;
+    --gold: #c5a059;
+    --dark: #0f1113;
+    --card: #1a1d21;
+    --border: #2d3748;
+    --red: #ce1126;
+    --blue: #2563eb;
+    --purple: #6d28d9;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #0f1113;
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow-x: hidden;
+}
+
+.header {
+    background: #15181b;
+    padding: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid var(--gold);
+}
+
+.title h1 {
+    font-size: 1.8rem;
+    letter-spacing: 0.5px;
+}
+
+.title span {
+    color: #9ca3af;
+}
+
+/* ZONE DES FILTRES ET COMMANDES */
+.controls-zone {
+    background: #15181b;
+    margin: 20px;
+    padding: 20px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+}
+
+.filter-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    background: #222;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.filter-btn:hover, .filter-btn.active {
+    background: var(--green);
+}
+
+.filter-btn:active {
+    transform: scale(0.98);
+}
+
+.search-container {
+    width: 100%;
+}
+
+.search-bar {
+    width: 100%;
+    padding: 12px;
+    background: #111827;
+    color: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.search-bar:focus {
+    border-color: var(--green);
+}
+
+/* GRILLE PREMIUM TRICOLONNE SOC */
+.main-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr 320px;
+    gap: 20px;
+    padding: 0 20px 20px 20px;
+}
+
+.left-panel, .right-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.center-panel {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 15px;
+    border: 1px solid var(--border);
+}
+
+/* Carte responsive avec hauteur adaptative dynamique */
+#map {
+    height: calc(100vh - 260px);
+    min-height: 600px;
+    border-radius: 12px;
+    background: #0b0d0f;
+}
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 15px;
+    padding: 20px;
+}
+
+.card h3 {
+    font-size: 1.1rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+}
+
+.card p {
+    color: #9ca3af;
+    font-size: 0.9rem;
+}
+
+.card h2 {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+.blue { color: #60a5fa; }
+.red { color: #f87171; }
+.gold { color: #fbbf24; }
+.green { color: #4ade80; }
+
+/* PANNEAUX DROITS */
+#intelligencePanel p {
+    color: #f3f4f6;
+}
+
+#liveFeed, #riskZones {
+    max-height: 230px;
+    overflow-y: auto;
+    padding-right: 2px;
+}
+
+.scan-item {
+    padding: 10px;
+    border-bottom: 1px solid #2d3748;
+    font-size: .85rem;
+}
+
+.scan-item:last-child {
+    border-bottom: none;
+}
+
+.risk-item {
+    background: #2b1212;
+    border-left: 4px solid var(--red);
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-size: .9rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.risk-item:hover {
+    background: #3f1a1a;
+}
+
+/* INFOBULLES PREMIUM CARTE */
+.popup-container {
+    color: #111827;
+    min-width: 240px;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.popup-btn-group {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.popup-btn {
+    flex: 1;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.8rem;
+    transition: background 0.2s;
+}
+
+.btn-audit { background: #3b82f6; color: white; }
+.btn-audit:hover { background: #2563eb; }
+.btn-suspect { background: var(--red); color: white; }
+.btn-suspect:hover { background: #a90e1e; }
+
+/* CUSTOM SCROLLBARS */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+@media(max-width: 1300px) {
+    .main-grid { grid-template-columns: 1fr; }
+    #map { height: 600px; }
+}
+</style>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+</head>
+<body>
+
+<div class="header">
+    <div class="title">
+        <h1>ANOR SURVEILLANCE NATIONALE</h1>
+        <span>Sûreté Économique & Traçabilité des Sceaux</span>
+    </div>
+</div>
+
+<div class="controls-zone">
+    <div class="filter-group" style="margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px; gap: 12px;">
+        <button class="filter-btn" onclick="window.location.href='./dashboard.html'">🏠 Dashboard</button>
+        <button class="filter-btn" onclick="window.location.href='./forge.html'">🏭 Forge</button>
+        <button class="filter-btn" onclick="window.location.href='./registry.html'">📋 Registry</button>
+        <button class="filter-btn" onclick="window.location.href='./alerts_center.html'">🚨 Alertes</button>
+        <button class="filter-btn" onclick="window.location.href='./intelligence_center.html'">🧠 Intelligence</button>
+    </div>
+
+    <div class="filter-group">
+        <button class="filter-btn" onclick="resetMap()">🇨🇲 Cameroun</button>
+        <button class="filter-btn" onclick="toggleHeatMap()">🔥 HeatMap</button>
+        <button class="filter-btn" onclick="showOnlySuspicious()">⚠️ Suspects</button>
+        <button class="filter-btn active" onclick="showAllScans()">🌍 Tous</button>
+        <button class="filter-btn" onclick="exportMapData()">📥 Export CSV</button>
+        <button class="filter-btn" onclick="refreshMap()">🔄 Actualiser</button>
+    </div>
+    <div class="search-container">
+        <input
+            id="searchInput"
+            class="search-bar"
+            placeholder="🔍 Produit, entreprise ou Seal ID"
+        />
+    </div>
+</div>
+
+<div class="main-grid">
+
+    <div class="left-panel">
+        <div class="card">
+            <p>Total scans</p>
+            <h2 id="totalScans" class="blue">...</h2>
+        </div>
+        <div class="card">
+            <p>Scans suspects</p>
+            <h2 id="fraudScans" class="red">...</h2>
+        </div>
+        <div class="card">
+            <p>Villes couvertes</p>
+            <h2 id="citiesCount" class="gold">...</h2>
+        </div>
+        <div class="card">
+            <p>Produits surveillés</p>
+            <h2 id="productsCount" class="green">...</h2>
+        </div>
+    </div>
+
+    <div class="center-panel">
+        <div id="map"></div>
+    </div>
+
+    <div class="right-panel">
+        <div class="card">
+            <h3>🧠 Intelligence ANOR</h3>
+            <div id="intelligencePanel">Chargement...</div>
+        </div>
+
+        <div class="card">
+            <h3>🚨 Foyers suspects</h3>
+            <div id="riskZones">Chargement...</div>
+        </div>
+
+        <div class="card">
+            <h3>📍 Derniers scans</h3>
+            <div id="liveFeed">Chargement...</div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// Routage adaptatif intelligent de l'API (Localhost vs Render)
+const API = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:3000/api/admin"
+    : "https://anor-back.onrender.com/api/admin";
+
+let heatLayer = null;
+let allScans = [];
+let allMarkers = [];
+
+let markerLayerGroup = L.layerGroup();
+let riskZoneLayerGroup = L.layerGroup();
+
+const map = L.map("map").setView([4.0511, 9.7679], 6);
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: 'ANOR'
+}).addTo(map);
+
+markerLayerGroup.addTo(map);
+riskZoneLayerGroup.addTo(map);
+
+window.addEventListener("resize", () => {
+    map.invalidateSize();
+});
+
+document.getElementById("searchInput").addEventListener("keyup", searchProduct);
+
+// Fonction utilitaire pour injecter le token d'authentification
+function getAuthHeaders(headers = {}) {
+    const token = localStorage.getItem("anor_token");
+    if (!token) {
+        console.warn("Requête cartographique émise sans session valide.");
+        return headers;
+    }
+    return {
+        ...headers,
+        "Authorization": `Bearer ${token}`
+    };
+}
+
+// Initialisation au cycle de démarrage
+loadMap();
+loadIntelligence();
+
+// Cycle d'écoute asynchrone régulier (30s)
+setInterval(() => {
+    loadMap();
+    loadIntelligence();
+}, 30000);
+
+async function loadMap() {
+    try {
+        const response = await fetch(`${API}/map`, {
+            headers: getAuthHeaders()
+        });
+        const scans = await response.json();
+        
+        allScans = scans;
+
+        buildMapLayers(scans);
+        
+        // Focus cinétique direct sans setTimeout
+        const suspicious = scans.filter(s => s.seals?.suspicious);
+        if (
+            suspicious.length &&
+            suspicious[0].latitude !== null &&
+            suspicious[0].longitude !== null
+        ) {
+            map.flyTo(
+                [
+                    suspicious[0].latitude,
+                    suspicious[0].longitude
+                ],
+                10
+            );
+        }
+        
+        setTimeout(() => { map.invalidateSize(); }, 100);
+    } catch(err) {
+        console.error("Échec de synchronisation cartographique réseau:", err);
+    }
+}
+
+function buildMapLayers(scans) {
+    markerLayerGroup.clearLayers();
+    riskZoneLayerGroup.clearLayers();
+    allMarkers = [];
+
+    let suspiciousCount = 0;
+    const cities = new Set();
+    const products = new Set();
+    const heatData = [];
+
+    scans.forEach(scan => {
+        if (!scan.latitude || !scan.longitude) return;
+
+        const isSuspicious = scan.seals?.suspicious;
+        
+        cities.add(scan.city || "Inconnue");
+        products.add(scan.seals?.seal_id);
+        if (isSuspicious) suspiciousCount++;
+
+        heatData.push([
+            scan.latitude,
+            scan.longitude,
+            isSuspicious ? 1 : 0.4
+        ]);
+
+        const color = isSuspicious ? "#ce1126" : "#4ade80";
+
+        const marker = L.circleMarker([scan.latitude, scan.longitude], {
+            radius: isSuspicious ? 12 : 7,
+            color: color,
+            fillColor: color,
+            fillOpacity: 0.8,
+            weight: 2
+        });
+
+        // Redirection directe vers le dossier d'audit au double-clic
+        marker.on("dblclick", () => {
+            if(scan.seals?.seal_id) {
+                openAuditModal(scan.seals.seal_id);
+            }
+        });
+
+        marker.bindPopup(`
+            <div class="popup-container">
+                <h3 style="margin-bottom:5px; color:var(--green);">${scan.seals?.products?.product_name || "Produit non enregistré"}</h3>
+                <b style="font-size:0.85rem; color:#4b5563;">${scan.seals?.products?.producer_name || "-"}</b>
+                <hr style="margin:8px 0; border:0; border-top:1px solid #e5e7eb;">
+                <font size="2">
+                    <b>ID Sceau :</b> ${scan.seals?.seal_id || "Inconnu"}<br>
+                    <b>Ville :</b> ${scan.city || "-"}<br>
+                    <b>Coordonnées :</b> ${scan.latitude.toFixed(4)}, ${scan.longitude.toFixed(4)}<br>
+                    <b>Date Scan :</b> ${scan.scan_time ? new Date(scan.scan_time).toLocaleString() : "-"}
+                </font>
+                <div class="popup-btn-group">
+                    <button class="popup-btn btn-audit" onclick="openAuditModal('${scan.seals?.seal_id}')">📄 Dossier</button>
+                    <button class="popup-btn btn-suspect" onclick="flagAsSuspicious('${scan.seals?.seal_id}')">⚠️ Alerte</button>
+                </div>
+            </div>
+        `);
+
+        allMarkers.push({
+            marker: marker,
+            scan: scan
+        });
+
+        markerLayerGroup.addLayer(marker);
+    });
+
+    if (heatLayer) {
+        map.removeLayer(heatLayer);
+    }
+    heatLayer = L.heatLayer(heatData, {
+        radius: 35,
+        blur: 25,
+        maxZoom: 10
+    }).addTo(map);
+
+    document.getElementById("totalScans").innerText = scans.length;
+    document.getElementById("fraudScans").innerText = suspiciousCount;
+    document.getElementById("citiesCount").innerText = cities.size;
+    document.getElementById("productsCount").innerText = products.size;
+
+    renderLiveFeed(scans);
+    createRiskZones(scans);
+}
+
+function toggleHeatMap() {
+    if (!heatLayer) return;
+    if (map.hasLayer(heatLayer)) {
+        map.removeLayer(heatLayer);
+    } else {
+        map.addLayer(heatLayer);
+    }
+}
+
+function resetMap() {
+    map.setView([4.0511, 9.7679], 6);
+}
+
+function showOnlySuspicious() {
+    updateActiveFilterButton("⚠️");
+    allMarkers.forEach(item => {
+        if (item.scan.seals?.suspicious) {
+            markerLayerGroup.addLayer(item.marker);
+        } else {
+            markerLayerGroup.removeLayer(item.marker);
+        }
+    });
+}
+
+function showAllScans() {
+    updateActiveFilterButton("🌍");
+    allMarkers.forEach(item => {
+        markerLayerGroup.addLayer(item.marker);
+    });
+}
+
+function updateActiveFilterButton(buttonText) {
+
+    document
+        .querySelectorAll(".controls-zone .filter-btn")
+        .forEach(btn => {
+
+            if (
+                btn.innerText.includes("🔥") ||
+                btn.innerText.includes("⚠️") ||
+                btn.innerText.includes("🌍")
+            ) {
+                btn.classList.remove("active");
+            }
+
+        });
+
+    document
+        .querySelectorAll(".controls-zone .filter-btn")
+        .forEach(btn => {
+
+            if(btn.innerText.includes(buttonText)) {
+                btn.classList.add("active");
+            }
+
+        });
+
+}
+
+function searchProduct() {
+    const value = document.getElementById("searchInput").value.toLowerCase().trim();
+    
+    if (!value) {
+        resetMap();
+        allMarkers.forEach(item => {
+            markerLayerGroup.addLayer(item.marker);
+        });
+        return;
+    }
+
+    const match = allScans.find(scan => 
+        (scan.seals?.seal_id || "").toLowerCase().includes(value) ||
+        (scan.seals?.products?.product_name || "").toLowerCase().includes(value) ||
+        (scan.seals?.products?.producer_name || "").toLowerCase().includes(value)
+    );
+
+    if (!match || !match.latitude || !match.longitude) return;
+
+    map.flyTo([match.latitude, match.longitude], 13);
+}
+
+function exportMapData() {
+    let csv = "\ufeffSealID,Ville,Pays,Suspect,Produit,Entreprise,Date,Latitude,Longitude\n";
+
+    allScans.forEach(scan => {
+        const productName = scan.seals?.products?.product_name || "Inconnu";
+        const producerName = scan.seals?.products?.producer_name || "-";
+        const scanDate = scan.scan_time ? new Date(scan.scan_time).toLocaleString() : "-";
+        const lat = scan.latitude || "";
+        const lng = scan.longitude || "";
+
+        csv += `"${scan.seals?.seal_id || ''}","${scan.city || ''}","${scan.country || ''}","${scan.seals?.suspicious || false}","${productName}","${producerName}","${scanDate}","${lat}","${lng}"\n`;
+    });
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "anor-surveillance.csv";
+    
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    
+    URL.revokeObjectURL(url);
+}
+
+function createRiskZones(scans) {
+    const grouped = {};
+
+    scans.forEach(scan => {
+        if (!scan.city) return;
+        if (!grouped[scan.city]) {
+            grouped[scan.city] = [];
+        }
+        grouped[scan.city].push(scan);
+    });
+
+    const focalizedRiskList = {};
+
+    Object.values(grouped).forEach(group => {
+        const suspicious = group.filter(x => x.seals?.suspicious).length;
+        const cityName = group[0].city;
+        
+        if (suspicious > 0) {
+            focalizedRiskList[cityName] = suspicious;
+        }
+
+        if (suspicious < 3) return;
+
+        const lat = group[0].latitude;
+        const lng = group[0].longitude;
+
+        const riskCircle = L.circle([lat, lng], {
+            radius: 4000,
+            color: "#ce1126",
+            fillColor: "#ce1126",
+            fillOpacity: 0.18,
+            weight: 2
+        });
+
+        riskZoneLayerGroup.addLayer(riskCircle);
+    });
+
+    renderRiskZonesUI(focalizedRiskList);
+}
+
+function renderLiveFeed(scans) {
+    const liveFeed = document.getElementById("liveFeed");
+    liveFeed.innerHTML = "";
+    
+    scans.slice(0, 10).forEach(scan => {
+        const isSuspicious = scan.seals?.suspicious;
+        const statusColor = isSuspicious ? "color:#f87171; font-weight:bold;" : "color:#4ade80;";
+        const statusText = isSuspicious ? "⚠️ Suspect" : "✅ Conforme";
+
+        liveFeed.innerHTML += `
+            <div class="scan-item">
+                <strong>${scan.seals?.products?.product_name || "Produit Inconnu"}</strong><br>
+                <span style="color:#9ca3af; font-size:0.8rem;">${scan.city || "Lieu non spécifié"}</span><br>
+                <span style="${statusColor}">${statusText}</span>
+            </div>
+        `;
+    });
+}
+
+function renderRiskZonesUI(focalizedRiskList) {
+    const riskZones = document.getElementById("riskZones");
+    riskZones.innerHTML = "";
+
+    const sortedCities = Object.entries(focalizedRiskList).sort((a, b) => b[1] - a[1]);
+
+    if (sortedCities.length === 0) {
+        riskZones.innerHTML = "<div style='color:#4ade80; font-size:0.85rem;'>Aucun foyer suspect détecté.</div>";
+        return;
+    }
+
+    sortedCities.slice(0, 5).forEach(([city, count]) => {
+        riskZones.innerHTML += `
+            <div class="risk-item" onclick="window.location.href='./registry.html'">
+                <strong>⚠️ ${city}</strong><br>
+                ${count} signalement(s) critique(s)
+            </div>
+        `;
+    });
+}
+
+async function loadIntelligence() {
+    try {
+        const res = await fetch(`${API}/intelligence`, {
+            headers: getAuthHeaders()
+        });
+        const data = await res.json();
+
+        document.getElementById("intelligencePanel").innerHTML = `
+            <p>Ville prioritaire : <strong class="gold">${data.priorityCity || "-"}</strong></p><br>
+            <p>Total scans traités : <strong>${data.totalScans}</strong></p><br>
+            <p>Sceaux compromis : <strong class="red">${data.suspiciousSeals}</strong></p><br>
+            <p>Indice de fraude : <strong class="red">${data.fraudRate} %</strong></p>
+        `;
+    } catch(err) {
+        console.error("Échec analytique IA réseau:", err);
+    }
+}
+
+function openAuditModal(sealId){
+    window.location.href = `./product_audit.html?seal=${sealId}`;
+}
+
+async function flagAsSuspicious(sealId) {
+    if(!confirm(`Confirmez-vous le marquage immédiat du sceau ${sealId} comme COMPROMIS/SUSPECT ?`)) return;
+    try {
+        const res = await fetch(`${API}/seal/${sealId}/suspicious`, {
+            method: "PATCH",
+            headers: getAuthHeaders({ "Content-Type": "application/json" }),
+            body: JSON.stringify({ suspicious: true })
+        });
+        
+        if (res.ok) {
+            console.warn(
+                "TODO BACKEND : POST /api/admin/alerts/create"
+            );
+
+            loadMap();
+        } else {
+            alert("Erreur réseau lors de l'application du protocole.");
+        }
+    } catch(err) {
+        console.error("Erreur protocole de compromission:", err);
+    }
+}
+
+function refreshMap() {
+    loadMap();
+    loadIntelligence();
+}
+</script>
+</body>
+</html>

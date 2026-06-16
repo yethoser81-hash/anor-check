@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ANOR Forge v2</title>
+
+<style>
+
+:root{
+--green:#008450;
+--gold:#c5a059;
+--bg:#f4f6f8;
+}
+
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
+}
+
+body{
+font-family:Segoe UI,sans-serif;
+background:var(--bg);
+display:flex;
+height:100vh;
+overflow:hidden;
+}
+
+.sidebar{
+width:420px;
+background:white;
+padding:20px;
+overflow-y:auto;
+border-right:1px solid #ddd;
+}
+
+.main{
+flex:1;
+padding:30px;
+overflow-y:auto;
+}
+
+h1{
+color:var(--green);
+margin-bottom:20px;
+}
+
+.section{
+margin-bottom:20px;
+}
+
+.section h3{
+margin-bottom:10px;
+color:var(--green);
+}
+
+label{
+display:block;
+font-size:12px;
+font-weight:bold;
+margin-bottom:5px;
+color:#666;
+}
+
+input,
+textarea{
+width:100%;
+padding:10px;
+border:1px solid #ddd;
+border-radius:8px;
+margin-bottom:10px;
+}
+
+.row{
+display:flex;
+gap:10px;
+}
+
+.row > div{
+flex:1;
+}
+
+.btn{
+width:100%;
+padding:15px;
+background:var(--green);
+color:white;
+border:none;
+border-radius:10px;
+cursor:pointer;
+font-weight:bold;
+font-size:15px;
+}
+
+.preview-card{
+background:white;
+padding:25px;
+border-radius:15px;
+margin-bottom:20px;
+}
+
+.preview-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:20px;
+}
+
+.preview-box{
+border:1px dashed #ccc;
+border-radius:12px;
+padding:15px;
+min-height:260px;
+display:flex;
+align-items:center;
+justify-content:center;
+flex-direction:column;
+}
+
+#packPreview{
+max-width:220px;
+display:none;
+}
+
+#sealPreview{
+width:250px;
+height:250px;
+border-radius:50%;
+background:
+radial-gradient(circle,#fff 30%,#69a8f2 31%,#fff 33%);
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:bold;
+color:#008450;
+}
+
+.summary{
+font-size:14px;
+line-height:1.8;
+}
+
+.hidden{
+display:none;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="sidebar">
+
+<h1>ANOR Forge</h1>
+
+<form id="forgeForm">
+
+<div class="section">
+
+<h3>Entreprise</h3>
+
+<label>Entreprise</label> <input type="text" id="producer_name" required>
+
+<label>Email producteur</label> <input type="email" id="producer_email" required>
+
+</div>
+
+<div class="section">
+
+<h3>Produit</h3>
+
+<label>Nom du produit</label> <input type="text" id="product_name" required>
+
+<label>Description technique</label>
+
+<textarea id="technical_description"></textarea>
+
+<label>Numéro de lot</label> <input type="text" id="lot_number" required>
+
+<label>Norme</label> <input type="text" id="standard_reference" value="NC-0163">
+
+</div>
+
+<div class="section">
+
+<h3>Origine</h3>
+
+<label>Pays d'origine</label> <input type="text" id="origin_country"
+value="Cameroun"
+oninput="toggleOrigin()">
+
+</div>
+
+<div class="section">
+
+<h3>Production</h3>
+
+<div id="cameroonDate">
+
+<label>Date certificat</label> <input type="date" id="certificate_date">
+
+</div>
+
+<div id="intlDates" class="hidden">
+
+<label>Date production</label> <input type="date" id="production_date">
+
+<label>Date péremption</label> <input type="date" id="expiration_date">
+
+</div>
+
+<label>Certificat PDF</label>
+<input 
+type="file" 
+id="certificateFile" 
+name="certificate"
+accept=".pdf" 
+required>
+
+</div>
+
+<div class="section">
+
+<h3>Conditionnement</h3>
+
+<label>Poids / Volume</label> <input type="text" id="weight_volume">
+
+<label>Caractéristiques emballage</label>
+
+<textarea id="packaging_characteristics"></textarea>
+
+<label>Nombre d'unités du lot</label> <input type="number"
+id="quantity_declared"
+value="1"
+min="1">
+
+<label>Image packaging</label> 
+<input
+type="file"
+id="packFile"
+accept="image/*"
+required
+onchange="previewPackaging(event)">
+
+</div>
+
+<button class="btn">
+Générer le Kit ANOR
+</button>
+
+</form>
+
+</div>
+
+<div class="main">
+
+<div class="preview-card">
+
+<h2>Aperçu du kit</h2>
+
+<br>
+
+<div class="summary">
+
+Nom du kit :
+
+<strong id="kitName">
+KIT_ANOR.zip
+</strong>
+
+</div>
+
+</div>
+
+<div class="preview-grid">
+
+<div class="preview-grid">
+
+<div class="preview-card">
+
+<h3>Sceau</h3>
+
+<div class="preview-box">
+
+<div id="sealPreview">
+ANOR
+</div>
+
+</div>
+
+</div>
+
+<div class="preview-card">
+
+<h3>Packaging</h3>
+
+<div class="preview-box">
+
+<img id="packPreview">
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+// Routage adaptatif intelligent de l'API (Localhost vs Render)
+const API = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:3000/api/admin"
+    : "https://anor-back.onrender.com/api/admin";
+
+// Fonction utilitaire pour injecter le token d'authentification
+function getAuthHeaders(headers = {}) {
+    const token = localStorage.getItem("anor_token");
+    if (!token) {
+        console.warn("Requête de forge émise sans session valide.");
+        return headers;
+    }
+    return {
+        ...headers,
+        "Authorization": `Bearer ${token}`
+    };
+}
+
+function toggleOrigin(){
+
+const val=
+document.getElementById("origin_country")
+.value
+.toLowerCase();
+
+const cam=
+val==="cameroun" || val==="";
+
+document
+.getElementById("cameroonDate")
+.classList
+.toggle("hidden",!cam);
+
+document
+.getElementById("intlDates")
+.classList
+.toggle("hidden",cam);
+
+}
+
+function previewPackaging(e){
+
+const file=e.target.files[0];
+
+if(!file)return;
+
+const reader=new FileReader();
+
+reader.onload=function(ev){
+
+const img=
+document.getElementById("packPreview");
+
+img.src=ev.target.result;
+img.style.display="block";
+
+};
+
+reader.readAsDataURL(file);
+
+}
+
+function updateKitName(){
+
+const company=
+document.getElementById("producer_name")
+.value
+.trim()
+.replaceAll(" ","_");
+
+const product=
+document.getElementById("product_name")
+.value
+.trim()
+.replaceAll(" ","_");
+
+const lot=
+document.getElementById("lot_number")
+.value
+.trim()
+.replaceAll(" ","_");
+
+document.getElementById("kitName").innerText=
+`${company}_${product}_${lot}.zip`;
+
+}
+
+[
+"producer_name",
+"product_name",
+"lot_number"
+].forEach(id=>{
+
+document
+.getElementById(id)
+.addEventListener("input",updateKitName);
+
+});
+
+document
+.getElementById("forgeForm")
+.addEventListener("submit",async(e)=>{
+
+e.preventDefault();
+
+const formData =
+new FormData();
+
+formData.append(
+"product_name",
+document.getElementById("product_name").value
+);
+
+formData.append(
+"producer_name",
+document.getElementById("producer_name").value
+);
+
+formData.append(
+"producer_email",
+document.getElementById("producer_email").value
+);
+
+formData.append(
+"technical_description",
+document.getElementById("technical_description").value
+);
+
+formData.append(
+"lot_number",
+document.getElementById("lot_number").value
+);
+
+formData.append(
+"standard_reference",
+document.getElementById("standard_reference").value
+);
+
+formData.append(
+"origin_country",
+document.getElementById("origin_country").value
+);
+
+formData.append(
+"certificate_date",
+document.getElementById("certificate_date").value
+);
+
+formData.append(
+"production_date",
+document.getElementById("production_date").value
+);
+
+formData.append(
+"expiration_date",
+document.getElementById("expiration_date").value
+);
+
+formData.append(
+"weight_volume",
+document.getElementById("weight_volume").value
+);
+
+formData.append(
+"packaging_characteristics",
+document.getElementById("packaging_characteristics").value
+);
+
+formData.append(
+"quantity_declared",
+document.getElementById("quantity_declared").value
+);
+
+const certificateInput =
+document.getElementById("certificateFile");
+
+if(
+certificateInput.files[0]
+){
+
+formData.append(
+"certificate",
+certificateInput.files[0]
+);
+
+}
+
+// Récupération du fichier d'image packaging
+const packInput = document.getElementById("packFile");
+if(packInput.files[0]){
+    formData.append("packaging_image", packInput.files[0]);
+}
+
+try {
+// L'appel pointe dynamiquement vers l'infrastructure cible configurée
+const res=
+await fetch(`${API}/forge`,{
+
+method:"POST",
+
+headers: getAuthHeaders(),
+
+body:formData
+
+});
+
+const data=
+await res.json();
+
+if(data.success){
+
+alert(
+`Sceau généré :
+
+${data.sealID}
+
+Unités :
+${data.serializedUnits}`
+);
+
+}else{
+
+alert(data.message);
+
+}
+} catch(err) {
+console.error("Erreur lors de la génération du kit:", err);
+alert("Impossible de joindre la forge de certification.");
+}
+
+});
+
+toggleOrigin();
+
+</script>
+</body>
+</html>

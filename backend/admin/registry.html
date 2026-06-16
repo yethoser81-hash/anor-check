@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>ANOR Registry Center</title>
+
+<style>
+
+:root{
+    --green:#008450;
+    --gold:#c5a059;
+    --dark:#0f1113;
+    --card:#1a1d21;
+    --border:#2d3748;
+    --red:#ce1126;
+    --blue:#2563eb;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:var(--dark);
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color:white;
+}
+
+.header{
+    background:#15181b;
+    padding:25px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-bottom:3px solid var(--gold);
+}
+
+.logo-title{
+    display:flex;
+    flex-direction:column;
+}
+
+.logo-title h1{
+    color:white;
+    font-size:1.8rem;
+    letter-spacing:0.5px;
+}
+
+.logo-title span{
+    color:#9ca3af;
+    font-size:.85rem;
+}
+
+.top-actions{
+    display:flex;
+    gap:12px;
+}
+
+.btn{
+    border:none;
+    cursor:pointer;
+    padding:12px 18px;
+    border-radius:10px;
+    font-weight:bold;
+    transition:.3s;
+}
+
+.btn:hover{
+    transform:translateY(-2px);
+}
+
+.btn-primary{
+    background:var(--green);
+    color:white;
+}
+
+.btn-secondary{
+    background:#374151;
+    color:white;
+}
+
+.hero{
+    padding:35px;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:20px;
+}
+
+.stat-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:20px;
+}
+
+.stat-card h2{
+    font-size:2.3rem;
+    margin-bottom:8px;
+}
+
+.stat-card p{
+    color:#9ca3af;
+}
+
+.green{
+    color:#4ade80;
+}
+
+.red{
+    color:#f87171;
+}
+
+.gold{
+    color:#fbbf24;
+}
+
+.blue{
+    color:#60a5fa;
+}
+
+.registry-zone{
+    margin-top:30px;
+    background:var(--card);
+    border-radius:16px;
+    border:1px solid var(--border);
+    padding:25px;
+}
+
+.toolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+    gap:15px;
+}
+
+.search{
+    flex:1;
+}
+
+.search input{
+    width:100%;
+    padding:12px;
+    border-radius:10px;
+    border:none;
+    background:#111827;
+    color:white;
+}
+
+.filters{
+    display:flex;
+    gap:10px;
+}
+
+.filters select{
+    background:#111827;
+    color:white;
+    border:none;
+    padding:12px;
+    border-radius:10px;
+}
+
+.table-container{
+    overflow:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+thead{
+    background:#111827;
+}
+
+th{
+    padding:15px;
+    text-align:left;
+    font-size:.85rem;
+    color:#9ca3af;
+}
+
+td{
+    padding:15px;
+    border-bottom:1px solid var(--border);
+}
+
+tr:hover{
+    background:#20242b;
+}
+
+.badge{
+    padding:6px 10px;
+    border-radius:50px;
+    font-size:.75rem;
+    font-weight:bold;
+}
+
+.badge-valid{
+    background:#064e3b;
+    color:#4ade80;
+}
+
+.badge-expired{
+    background:#7f1d1d;
+    color:#f87171;
+}
+
+.badge-suspended{
+    background:#78350f;
+    color:#fbbf24;
+}
+
+.action-group{
+    display:flex;
+    gap:8px;
+}
+
+.action{
+    border:none;
+    cursor:pointer;
+    width:auto;
+    height:36px;
+    padding:0 12px;
+    border-radius:8px;
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:0.2s;
+    font-size:0.85rem;
+    font-weight:bold;
+}
+
+.action:hover {
+    transform: scale(1.05);
+}
+
+.view{
+    background:#2563eb;
+}
+.view:hover { background: #1d4ed8; }
+
+.revoke{
+    background:#ce1126;
+    width:36px;
+    padding:0;
+}
+.revoke:hover { background: #b91c1c; }
+
+.footer-panel{
+    margin-top:25px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.panel{
+    background:#111827;
+    border-radius:14px;
+    padding:20px;
+}
+
+.panel h3{
+    margin-bottom:15px;
+}
+
+.alert{
+    background:#1f2937;
+    padding:10px;
+    margin-bottom:10px;
+    border-left:4px solid var(--red);
+    border-radius:8px;
+}
+
+/* STYLES DU MODAL PREMIUM */
+.modal-overlay{
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    background:rgba(0,0,0,0.85);backdrop-filter:blur(5px);
+    display:none;justify-content:center;align-items:center;z-index:9999;
+    padding:20px;
+}
+.modal-container{
+    background:#15181b;border:2px solid var(--gold);
+    width:100%;max-width:1100px;max-height:90vh;
+    border-radius:16px;overflow-y:auto;box-shadow:0 20px 40px rgba(0,0,0,0.5);
+}
+.modal-header{
+    padding:20px;border-bottom:1px solid var(--border);
+    display:flex;justify-content:space-between;align-items:center;
+}
+.modal-body{padding:25px;}
+.modal-grid-top{display:grid;grid-template-columns:320px 1fr;gap:25px;margin-bottom:25px;}
+.modal-img-zone{
+    background:#1a1d21;border:1px dashed var(--border);border-radius:12px;
+    height:340px;display:flex;justify-content:center;align-items:center;overflow:hidden;
+}
+.modal-img-zone img{width:100%;height:100%;object-fit:cover;}
+.modal-info-fields{
+    display:grid;grid-template-columns:1fr 1fr;gap:15px;align-content:start;
+}
+.info-field{background:#111827;padding:12px;border-radius:8px;border-left:3px solid var(--gold);}
+.info-field label{font-size:0.75rem;color:#9ca3af;text-transform:uppercase;display:block;margin-bottom:4px;}
+.info-field span{font-size:0.95rem;font-weight:600;}
+.modal-sections-bottom{display:grid;grid-template-columns:1fr;gap:25px;}
+.modal-panel-block{background:#111827;border-radius:12px;padding:20px;}
+.modal-panel-block h4{margin-bottom:15px;font-size:1.1rem;display:flex;align-items:center;gap:8px;}
+.modal-table{width:100%;font-size:0.85rem;border-collapse:collapse;}
+.modal-table th{padding:12px;background:#1a1d21;text-align:left;font-size:0.8rem;color:#9ca3af;}
+.modal-table td{padding:12px;border-bottom:1px solid #1a1d21;vertical-align:top;}
+
+/* Boutons d'action pour le terrain */
+.action-btn-terrain {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    padding:8px 12px;
+    border-radius:6px;
+    color:white;
+    text-decoration:none;
+    font-weight:bold;
+    font-size:0.8rem;
+    transition:0.2s;
+    text-align:center;
+}
+.btn-wa { background:#25d366; }
+.btn-wa:hover { background:#1ebd58; }
+.btn-tel { background:#2563eb; }
+.btn-tel:hover { background:#1d4ed8; }
+.btn-gps { background:#eab308; color:#0f1113; }
+.btn-gps:hover { background:#ca8a04; }
+
+@media(max-width:1100px){
+    .stats{
+        grid-template-columns:1fr 1fr;
+    }
+    .footer-panel{
+        grid-template-columns:1fr;
+    }
+    .modal-grid-top{grid-template-columns:1fr;}
+    .modal-info-fields{grid-template-columns:1fr;}
+}
+
+</style>
+</head>
+
+<body>
+
+<script>
+// Interception immédiate : On bloque l'accès si aucun token n'est détecté
+const anorToken = localStorage.getItem("anor_token");
+if (!anorToken) {
+    console.error("Accès refusé : Aucun jeton d'authentification trouvé.");
+}
+</script>
+
+<div class="header">
+    <div class="logo-title">
+        <h1>ANOR REGISTRY CENTER</h1>
+        <span>Registre National des Produits Certifiés</span>
+    </div>
+    <div class="top-actions">
+        <button class="btn btn-secondary" onclick="window.location.href='./dashboard.html'">🏠 Dashboard</button>
+        <button class="btn btn-secondary" onclick="window.location.href='./alerts_center.html'">🚨 Alertes</button>
+        <button class="btn btn-secondary" onclick="window.location.href='./intelligence_center.html'">🧠 Intelligence</button>
+        <button class="btn class-primary btn-primary" onclick="window.location.href='./new_certificate.html'">➕ Nouveau Certificat</button>
+        <button class="btn btn-secondary" onclick="exportRegistry()">📤 Export Global</button>
+    </div>
+</div>
+
+<div class="hero">
+
+    <div class="stats">
+        <div class="stat-card">
+            <h2 id="statProducts" class="green">...</h2>
+            <p>Produits Certifiés</p>
+        </div>
+        <div class="stat-card">
+            <h2 id="statSeals" class="gold">...</h2>
+            <p>Sceaux Générés</p>
+        </div>
+        <div class="stat-card">
+            <h2 id="statSuspicious" class="red">...</h2>
+            <p>Sceaux Suspects</p>
+        </div>
+        <div class="stat-card">
+            <h2 id="statScans" class="blue">...</h2>
+            <p>Total Scans</p>
+        </div>
+    </div>
+
+    <div class="registry-zone">
+        <div class="toolbar">
+            <div class="search">
+                <input type="text" id="searchInput" onkeyup="filterRegistry()" placeholder="Recherche par produit, entreprise, SealID...">
+            </div>
+            <div class="filters">
+                <select>
+                    <option>Tous les Statuts</option>
+                    <option>Conforme</option>
+                    <option>Suspendu</option>
+                    <option>Expiré</option>
+                </select>
+                <select>
+                    <option>Toutes les Normes</option>
+                    <option>NC-0163</option>
+                    <option>NC-1001</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Seal ID</th>
+                        <th>Entreprise</th>
+                        <th>Produit</th>
+                        <th>Origine</th>
+                        <th>Norme</th>
+                        <th>Généré le</th>
+                        <th>Scans</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="registryTable">
+                    <tr>
+                        <td colspan="9" style="text-align:center;padding:40px;">
+                            Chargement...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="footer-panel">
+        <div class="panel">
+            <h3>🚨 Alertes Récentes</h3>
+            <div id="alertsContainer">
+                Chargement...
+            </div>
+        </div>
+
+        <div class="panel">
+            <h3>🧠 Intelligence ANOR</h3>
+            <div id="intelligencePanel">
+                Chargement...
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div id="premiumModal" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-container" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h2 id="mSealId" style="color:var(--gold);">Dossier Certificat : ...</h2>
+            <button class="btn btn-secondary" onclick="document.getElementById('premiumModal').style.display='none'" style="padding:6px 12px;">Fermer ×</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-grid-top">
+                <div class="modal-img-zone" id="mImgZone">
+                    </div>
+                <div class="modal-info-fields">
+                    <div class="info-field"><label>Produit</label><span id="mProduct">...</span></div>
+                    <div class="info-field"><label>Entreprise</label><span id="mProducer">...</span></div>
+                    <div class="info-field"><label>Email Opérateur</label><span id="mEmail">...</span></div>
+                    <div class="info-field"><label>Norme Appliquée</label><span id="mNorm" style="font-family:monospace;color:#4ade80;">...</span></div>
+                    <div class="info-field"><label>Origine</label><span id="mCountry">...</span></div>
+                    <div class="info-field"><label>Numéro de Lot</label><span id="mLot" style="font-family:monospace;">...</span></div>
+                    <div class="info-field"><label>Date Émission</label><span id="mDateCert">...</span></div>
+                    <div class="info-field"><label>Date Production</label><span id="mDateProd">...</span></div>
+                    <div class="info-field"><label>Date Péremption</label><span id="mDateExp">...</span></div>
+                    <div class="info-field"><label>Nombre Total de Scans</label><span id="mScanCount" style="color:#60a5fa;font-weight:bold;">...</span></div>
+                    <div class="info-field" style="grid-column: span 2;"><label>Description du produit</label><span id="mDescription">...</span></div>
+                    <div class="info-field" style="grid-column: span 2;"><label>Statut Réglementaire</label><span id="mStatus">...</span></div>
+                </div>
+            </div>
+            
+            <div class="modal-sections-bottom">
+                <div class="modal-panel-block">
+                    <h4 style="color:#60a5fa;">🌍 Derniers Scans Publics & Géolocalisation</h4>
+                    <div style="overflow-x:auto; margin-top:10px;">
+                        <table class="modal-table">
+                            <thead>
+                                <tr>
+                                    <th>Date & Heure</th>
+                                    <th>Localisation Estimée</th>
+                                    <th>IP Vérification</th>
+                                    <th>Appareil</th>
+                                </tr>
+                            </thead>
+                            <tbody id="mScanHistoryBody">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="modal-panel-block" style="border-top: 1px solid var(--border); padding-top:20px;">
+                    <h4 style="color:#25d366;">💬 Signalements Terrain & Données de Descente (WhatsApp & Appels)</h4>
+                    <div style="overflow-x:auto; margin-top:10px;">
+                        <table class="modal-table">
+                            <thead>
+                                <tr>
+                                    <th>Date Réception</th>
+                                    <th>Inspecteur / Alerteur</th>
+                                    <th>Localisation Cible (Descente)</th>
+                                    <th>Contenu du Signalement</th>
+                                    <th>Actions Immédiates</th>
+                                </tr>
+                            </thead>
+                            <tbody id="mReportHistoryBody">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Routage adaptatif intelligent de l'API (Localhost vs Render)
+const API = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:3000/api/admin"
+    : "https://anor-back.onrender.com/api/admin"; // TODO: Remplace cette URL par ton lien de production réel sur Render
+
+function cleanText(text) {
+    if (!text) return "-";
+    return text.replace(/Vgtale/g, "Végétale")
+               .replace(/Vgtal/g, "Végétal");
+}
+
+// Fonction utilitaire pour injecter le token d'authentification
+function getAuthHeaders(headers = {}) {
+    const token = localStorage.getItem("anor_token");
+    if (!token) {
+        console.warn("Requête émise sans session valide.");
+        return headers;
+    }
+    return {
+        ...headers,
+        "Authorization": `Bearer ${token}`
+    };
+}
+
+loadStats();
+loadRegistry();
+loadAlerts();
+
+async function loadStats(){
+    try{
+        const res = await fetch(`${API}/stats`, {
+            headers: getAuthHeaders()
+        });
+        const data = await res.json();
+
+        document.getElementById("statProducts").innerText = data.totalProducts || 0;
+        document.getElementById("statSeals").innerText = data.totalSeals || 0;
+        document.getElementById("statSuspicious").innerText = data.suspiciousSeals || 0;
+        document.getElementById("statScans").innerText = data.totalScans || 0;
+    }catch(err){
+        console.error("Erreur stats:", err);
+    }
+}
+
+async function loadRegistry(){
+    try{
+        const res = await fetch(`${API}/products`, {
+            headers: getAuthHeaders()
+        });
+        const products = await res.json();
+        const table = document.getElementById("registryTable");
+
+        if(products.length === 0){
+            table.innerHTML = `
+            <tr>
+                <td colspan="9" style="text-align:center;padding:40px;color:#9ca3af;">
+                    Aucun produit enregistré
+                </td>
+            </tr>
+            `;
+            return;
+        }
+
+        table.innerHTML = "";
+
+        products.forEach(product=>{
+            table.innerHTML += `
+            <tr>
+                <td style="font-weight:bold;color:#fbbf24;">${product.seal_id}</td>
+                <td>${cleanText(product.producer_name)}</td>
+                <td>${cleanText(product.product_name)}</td>
+                <td>${product.country || "-"}</td>
+                <td style="font-family:monospace;">${product.lot_number || "-"}</td>
+                <td>
+                ${
+                product.generated_at
+                ?
+                new Date(product.generated_at).toLocaleDateString()
+                :
+                "-"
+                }
+                </td>
+                <td style="font-weight:bold;color:#60a5fa;">${product.scan_count || 0}</td>
+                <td>
+                ${
+                product.suspicious
+                ?
+                `<span class="badge badge-suspended">SUSPECT</span>`
+                :
+                `<span class="badge badge-valid">VALIDE</span>`
+                }
+                </td>
+                <td>
+                    <div class="action-group">
+                        <button onclick="openDetail('${product.seal_id}')" class="action view" title="Voir le dossier">📄 Dossier</button>
+                        <button onclick="toggleSuspicious('${product.seal_id}', ${product.suspicious})" class="action revoke" title="Signaler / Retirer suspicion">
+                            ⚠️
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            `;
+        });
+    }catch(err){
+        console.error("Erreur registre:", err);
+    }
+}
+
+async function loadAlerts(){
+    try{
+        const res = await fetch(`${API}/alerts`, {
+            headers: getAuthHeaders()
+        });
+        const alerts = await res.json();
+
+        const container = document.getElementById("alertsContainer");
+        const intelligence = document.getElementById("intelligencePanel");
+
+        if(alerts.length === 0){
+            container.innerHTML = `
+            <div class="alert" style="border-left-color:var(--green);">
+                Aucun incident détecté.
+            </div>
+            `;
+            intelligence.innerHTML = `
+                Aucune activité frauduleuse détectée actuellement.
+            `;
+            return;
+        }
+
+        container.innerHTML = "";
+
+        alerts.forEach(item=>{
+            container.innerHTML += `
+            <div class="alert">
+                SealID : <strong>${item.seal_id}</strong> détecté comme suspect.
+            </div>
+            `;
+        });
+
+        intelligence.innerHTML = `
+            <strong>${alerts.length}</strong> sceaux suspects détectés.<br><br>
+            Une vérification terrain émise.
+        `;
+    }catch(err){
+        console.error("Erreur alertes:", err);
+    }
+}
+</script>
+
+<script>
+async function loadIntelligence(){
+    try{
+        const response = await fetch(`${API}/intelligence`, {
+            headers: getAuthHeaders()
+        });
+        const intel = await response.json();
+
+        document.getElementById("intelligencePanel").innerHTML = `
+            <p>Ville prioritaire : <strong>${intel.priorityCity || "N/A"}</strong></p><br>
+            <p>Scans enregistrés : <strong>${intel.totalScans || 0}</strong></p><br>
+            <p>Sceaux suspects : <strong>${intel.suspiciousSeals || 0}</strong></p><br>
+            <p>Taux de fraude : <strong>${intel.fraudRate || 0}%</strong></p>
+        `;
+    }catch(err){
+        document.getElementById("intelligencePanel").innerHTML = "Impossible de charger l'analyse.";
+    }
+}
+
+async function toggleSuspicious(sealId, currentState){
+    const confirmAction = confirm(
+        currentState
+        ? "Retirer l'alerte sur ce lot ?"
+        : "Déclarer ce sceau comme suspect sur le marché ?"
+    );
+
+    if(!confirmAction) return;
+
+    try{
+        await fetch(`${API}/seal/${sealId}/suspicious`, {
+            method: "PATCH",
+            headers: getAuthHeaders({
+                "Content-Type": "application/json"
+            }),
+            body: JSON.stringify({
+                notSuspicious: currentState
+            })
+        });
+
+        loadStats();
+        loadRegistry();
+        loadAlerts();
+        loadIntelligence();
+
+    }catch(err){
+        alert("Erreur serveur lors de la modification du statut.");
+    }
+}
+
+async function openDetail(sealId){
+    try {
+        const res = await fetch(`${API}/product/${sealId}`, {
+            headers: getAuthHeaders()
+        });
+        if (!res.ok) throw new Error("Erreur de communication avec l'API");
+        
+        const data = await res.json();
+        
+        const p = data.product || data || {};
+        const s = p.products || p || {}; 
+        const scansList = data.scans || p.scans || [];
+        
+        document.getElementById("mSealId").innerText = `Dossier Certificat : ${p.seal_id || sealId}`;
+        document.getElementById("mProduct").innerText = cleanText(s.product_name || p.product_name || "N/A");
+        document.getElementById("mProducer").innerText = cleanText(s.producer_name || p.producer_name || "N/A");
+        document.getElementById("mEmail").innerText = s.producer_email || p.producer_email || "Non renseigné";
+        document.getElementById("mNorm").innerText = s.standard_code || p.standard_code || "NC-0000";
+        document.getElementById("mCountry").innerText = s.country || p.country || "N/A";
+        document.getElementById("mLot").innerText = s.lot_number || p.lot_number || "N/A";
+        document.getElementById("mDescription").innerText = cleanText(s.product_description || p.product_description || "Aucune description fournie.");
+        document.getElementById("mScanCount").innerText = scansList.length;
+        
+        document.getElementById("mDateCert").innerText = p.generated_at ? new Date(p.generated_at).toLocaleString() : "N/A";
+        document.getElementById("mDateProd").innerText = s.production_date ? new Date(s.production_date).toLocaleDateString() : "N/A";
+        document.getElementById("mDateExp").innerText = s.expiry_date ? new Date(s.expiry_date).toLocaleDateString() : "N/A";
+        
+        const isSuspicious = p.suspicious === true || p.suspicious === 1;
+        
+        document.getElementById("mStatus").innerHTML = isSuspicious 
+            ? `<span class="badge badge-suspended" style="display:inline-block; padding:8px 14px;">ALERTE FRAUDE ACTIVE - MARCHÉ SOUS SURVEILLANCE</span>`
+            : `<span class="badge badge-valid" style="display:inline-block; padding:8px 14px;">HOMOLOGUÉ / CONFORME</span>`;
+            
+        const imgZone = document.getElementById("mImgZone");
+        const imgUrl = s.packaging_image_url || p.packaging_image_url;
+        if(imgUrl) {
+            imgZone.innerHTML = `<img src="${imgUrl}" alt="Packaging">`;
+        } else {
+            imgZone.innerHTML = `<div style="text-align:center;color:#6b7280;padding:20px;">📷 Aucune photo disponible</div>`;
+        }
+        
+        const scanHistoryBody = document.getElementById("mScanHistoryBody");
+        if(scansList.length === 0){
+            scanHistoryBody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#6b7280;padding:15px;">Aucun scan répertorié pour ce produit.</td></tr>`;
+        } else {
+            scanHistoryBody.innerHTML = "";
+            scansList.forEach(scan => {
+                scanHistoryBody.innerHTML += `
+                    <tr>
+                        <td>${new Date(scan.scan_time || scan.created_at).toLocaleString()}</td>
+                        <td style="font-weight:bold;color:#60a5fa;">🌍 ${scan.city || "Inconnue"}, ${scan.country || "N/A"}</td>
+                        <td style="font-family:monospace;">${scan.ip_address || "0.0.0.0"}</td>
+                        <td style="color:#9ca3af;">${scan.user_agent ? scan.user_agent.substring(0,40) + '...' : 'Mobile'}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        const reportHistoryBody = document.getElementById("mReportHistoryBody");
+        
+        const reportsResponse = await fetch(`${API}/reports/${sealId}`, {
+            headers: getAuthHeaders()
+        });
+        const reports = await reportsResponse.json();
+
+        if(!reports.length){
+            reportHistoryBody.innerHTML = `
+            <tr>
+                <td colspan="5" style="text-align:center; color:#6b7280; padding:20px;">
+                Aucun signalement terrain enregistré.
+                </td>
+            </tr>
+            `;
+        }else{
+            reportHistoryBody.innerHTML = "";
+            reports.forEach(report=>{
+                reportHistoryBody.innerHTML += `
+                <tr>
+                    <td>${new Date(report.created_at).toLocaleString()}</td>
+                    <td><strong>${report.reporter_name || "-"}</strong></td>
+                    <td>${report.city || "-"}</td>
+                    <td>${report.report_message || "-"}</td>
+                    <td>
+                        <div style="display:flex; flex-direction:column; gap:6px;">
+                        ${
+                        report.reporter_whatsapp
+                        ?
+                        `
+                        <a href="https://wa.me/${report.reporter_whatsapp}" target="_blank" rel="noopener noreferrer" class="action-btn-terrain btn-wa">
+                        💬 WhatsApp
+                        </a>
+                        `
+                        :
+                        ""
+                        }
+
+                        ${
+                        report.reporter_phone
+                        ?
+                        `
+                        <a href="https://tel:${report.reporter_phone}" class="action-btn-terrain btn-tel">
+                        📞 Appeler
+                        </a>
+                        `
+                        :
+                        ""
+                        }
+
+                        ${
+                        report.latitude && report.longitude
+                        ?
+                        `
+                        <a href="https://www.google.com/maps/search/?api=1&query=${report.latitude},${report.longitude}" target="_blank" rel="noopener noreferrer" class="action-btn-terrain btn-gps">
+                        📍 GPS
+                        </a>
+                        `
+                        :
+                        ""
+                        }
+                        </div>
+                    </td>
+                </tr>
+                `;
+            });
+        }    
+        
+        document.getElementById("premiumModal").style.display = "flex";
+    } catch(err) {
+        console.error("Détails de l'erreur détectée:", err);
+        alert("Erreur lors de la lecture des données du produit.");
+    }
+}
+
+function openAuditModal(sealId){
+    window.location.href = `./product_audit.html?seal=${sealId}`;
+}
+
+function exportRegistry(){
+    const token = localStorage.getItem("anor_token");
+    window.location.href = `${API}/export/products?token=${token}`;
+}
+
+function filterRegistry(){
+    const value = document.getElementById("searchInput").value.toLowerCase();
+    const rows = document.querySelectorAll("#registryTable tr");
+
+    rows.forEach(row=>{
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(value) ? "" : "none";
+    });
+}
+
+function closeModal(e){
+    if(e.target.id === "premiumModal") {
+        document.getElementById("premiumModal").style.display = "none";
+    }
+}
+
+setTimeout(loadIntelligence, 500);
+</script>
+</body>
+</html>
