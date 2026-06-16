@@ -115,10 +115,9 @@ app.use(
 
 app.get("/", (req, res) => {
 
-    res.json({
-        success: true,
-        message: "ANOR Verification API"
-    });
+    res.sendFile(
+        path.join(__dirname, "../admin/dashboard.html")
+    );
 
 });
 
